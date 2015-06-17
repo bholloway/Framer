@@ -1,0 +1,21 @@
+{
+  "name": "Framer",
+  "version": "0.0.1",
+  "authors": [
+    "Chris impaler777@gmail.com"
+  ],
+  "description": "Manage and communicate between iframe/webview elements easier.",
+  "main": "Framer.js",
+  "keywords": [
+    "iframe",
+    "webview"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
