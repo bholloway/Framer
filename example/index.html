@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi"/>
+    <title>Framer Test</title>
+
+
+    <script type="text/javascript" src="../Framer.js"></script>
+
+    <script type="text/javascript">
+
+        var main;
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Create a new Framer Object
+            main = new window.framer.Framer('main');
+
+            // Each frame can have a different style,
+            // attributes and arguments that is persistent when its opened and closed.
+            var options = {
+                style:{
+                    position: 'absolute',
+                    width: '1000px',
+                    height: '600px',
+                    left: '400px',
+                    top: '100px'
+                },
+                attributes:{
+                    'scrolling': 'yes'
+                },
+                arguments: {
+                    'guid':'gsfdfgsdgfgfsdgfsdgf'
+                }
+
+            };
+
+            main.add('page-00', 'frames/page-00.html', options);
+            main.add('page-01', 'frames/page-01.html');
+            main.add('page-02', 'frames/page-02.html');
+
+            main.receive('ping', function(message){
+                framer.domLog('ping' + message);
+            });
+
+            main.receive('close', function(message){
+                main.close(message);
+            });
+
+            var page00Args = {
+                arguments: {
+                    blue: 'color',
+                    dot: 'planet'
+                }
+            };
+
+            main.open('page-00', page00Args);
+        });
+
+    </script>
+
+</head>
+<body>
+    <h3>Framer</h3>
+
+    <button onclick="main.send('ping', 'Hi page I am the main!', 'page-00');">Ping Page 00</button>
+    <button onclick="main.send('ping', 'Hi page I am the main!');">Ping Active FramerClient</button>
+
+
+    <button onclick="main.close('page-00')">Close Page 00</button>
+
+    <hr>
+
+    <br>
+
+    <button onclick="main.open('page-00')">Page 00</button>
+
+    <br>
+
+    <button onclick="main.open('page-01')">Page 01</button>
+
+    <br>
+
+    <button onclick="main.open('page-02')">Page 02</button>
+
+</body>
+</html>
