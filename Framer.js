@@ -21,8 +21,8 @@
         this.frames = [];
         this.handlers = [];
         this.focus = null;
-        this.container = createFrameContainer(this.name);
         this.zIndex = 99999;
+        this.container = this.createFrameContainer(this.name);
         // The default style will make the frames fullscreen as if this is a
         // single frame application ;)
         this.style = {
@@ -36,8 +36,7 @@
             border: 'none',
             margin: '0',
             padding: '0',
-            overflow: 'hidden',
-            zIndex: '999999'
+            overflow: 'hidden'
         };
 
         this.receiveMessage = function (event) {
@@ -117,7 +116,6 @@
             console.error('Framer open() there is no frame with that name', name);
             return;
         }
-
         if (this.focus && this.focus !== existing) {
             this.closeFrame(this.focus);
         }
@@ -140,13 +138,15 @@
      */
     Framer.prototype.openAbove = function (name, options) {
         options = options || {};
+        options.style = options.style || {};
+
         var existing = this.getFrame(name);
         if (!existing) {
             console.error('Framer open() there is no frame with that name', name);
             return;
         }
         if (!options.style.zIndex) {
-            options.style.zIndex = this.zIndex + 1;
+            options.style.zIndex = existing.style.zIndex + 1;
         }
         this.openFrame(existing, options);
 
@@ -236,10 +236,6 @@
         //todo webview ms-app-webview
         var iframe = document.createElement('iframe');
 
-        if (!options.style.zIndex) {
-            options.style.zIndex = this.zIndex;
-        }
-
         setElementStyles(iframe, options.style);
         setElementAttributes(iframe, options.attributes);
 
@@ -296,6 +292,20 @@
         } else {
             console.error('You already have a callback for type', name);
         }
+    };
+
+    Framer.prototype.createFrameContainer = function(className) {
+        var container;
+        if (!elementExistsByClassName(className)) {
+            container = window.document.createElement('div');
+            container.className = className;
+            container.style.position = 'fixed';
+            container.style.top = 0;
+            container.style.left = 0;
+            container.style.zIndex = this.zIndex;
+            prependElement(window.document.body, container);
+        }
+        return container;
     };
 
     function FrameMessage(type, data, origin, target, messenger) {
@@ -377,20 +387,6 @@
             element.setAttribute(attribute, attributes[attribute]);
         }
         return element;
-    }
-
-    function createFrameContainer(className) {
-        var container;
-        if (!elementExistsByClassName(className)) {
-            container = window.document.createElement('div');
-            container.className = className;
-            container.style.position = 'fixed';
-            container.style.top = 0;
-            container.style.left = 0;
-            container.style.zIndex = this.zIndex;
-            prependElement(window.document.body, container);
-        }
-        return container;
     }
 
     function elementExistsByClassName(className) {
