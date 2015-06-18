@@ -40,6 +40,10 @@
         };
 
         this.receiveMessage = function (event) {
+            if (event.origin !==  document.location.origin) {
+                return;
+            }
+
             if (event.data.messenger === FramerClientMessengerType &&
                 (event.data.target === this.name || typeof event.data.target === 'undefined')) {
                 this.handleMessage(event.data);
@@ -231,7 +235,7 @@
         options.attributes = options.attributes || {};
         var paramaters = createUrlArgs(options.arguments);
         var params = '&name=' + frame.name + '&' + paramaters;
-        var origin = '#origin=' + document.location.href;
+        var origin = '#origin=' + encodeURIComponent(document.location.href);
 
         //todo webview ms-app-webview
         var iframe = document.createElement('iframe');
@@ -262,6 +266,10 @@
         this.origin = filterByKeyValue(this.params, 'name', 'origin').data; //todo get last value
 
         this.receiveMessage = function (event) {
+            if (event.origin !== document.location.origin) {
+                return;
+            }
+
             if (event.data.messenger === FramerMessengerType &&
                 (event.data.target === this.name || typeof event.data.target === 'undefined')) {
                 this.handleMessage(event.data);
@@ -321,7 +329,7 @@
         var properties = Object.getOwnPropertyNames(args);
 
         properties.forEach(function propertyResolver(name) {
-            var encodedArg = name + '=' + encodeURI(args[name]);
+            var encodedArg = name + '=' + encodeURIComponent(args[name]);
             argsList.push(encodedArg);
         });
 
@@ -356,7 +364,8 @@
     function parseParams(hash) {
         hash = hash || document.location.hash;
         var parameters = [];
-        var urlParams = decodeURIComponent(hash.replace(/^#/, ''));
+        var urlParams = decodeURIComponent(hash.replace(/^#\//, ''));
+        urlParams = decodeURIComponent(hash.replace(/^#/, ''));
         var segments = urlParams.split('&');
 
         segments.forEach(function (segment) {
