@@ -235,7 +235,7 @@
         options.attributes = options.attributes || {};
         var paramaters = createUrlArgs(options.arguments);
         var params = '&name=' + frame.name + '&' + paramaters;
-        var origin = '#origin=' + encodeURIComponent(document.location.href);
+        var origin = '?origin=' + encodeURIComponent(document.location.href);
 
         //todo webview ms-app-webview
         var iframe = document.createElement('iframe');
