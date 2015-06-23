@@ -128,7 +128,7 @@
         if (options) {
             mergeOptions(this.focus.options, options);
         }
-        this.openFrame(this.focus, options);
+        this.openFrame(this.focus);
 
         return existing;
     };
@@ -233,8 +233,8 @@
         options.arguments = options.arguments || {};
         options.style = options.style || {};
         options.attributes = options.attributes || {};
-        var paramaters = createUrlArgs(options.arguments);
-        var params = '&name=' + frame.name + '&' + paramaters;
+        var parameters = createUrlArgs(options.arguments);
+        var params = '&name=' + frame.name + '&' + parameters;
         var origin = '?origin=' + encodeURIComponent(document.location.href);
 
         //todo webview ms-app-webview
@@ -329,7 +329,7 @@
         var properties = Object.getOwnPropertyNames(args);
 
         properties.forEach(function propertyResolver(name) {
-            var encodedArg = name + '=' + encodeURIComponent(args[name]);
+            var encodedArg = name + '=' + encodeURI(args[name]);
             argsList.push(encodedArg);
         });
 
@@ -337,9 +337,9 @@
     }
 
     function mergeOptions(existing, custom) {
-        var keys = Object.getOwnPropertyNames(existing);
+        var keys = Object.getOwnPropertyNames(custom);
         keys.forEach(function (key) {
-            if (custom[key]) {
+            if (typeof existing[key] === 'undefined') {
                 existing[key] = custom[key];
             }
         });
