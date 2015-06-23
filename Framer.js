@@ -362,23 +362,50 @@
     }
 
     function parseParams(hash) {
-        hash = hash || document.location.hash;
+        hash = hash || document.location.search;
         var parameters = [];
-        var urlParams = decodeURIComponent(hash.replace(/^#\//, ''));
-        urlParams = decodeURIComponent(hash.replace(/^#/, ''));
-        var segments = urlParams.split('&');
 
-        segments.forEach(function (segment) {
-            if (segment && segment !== '') {
-                var name = segment.substring(0, segment.indexOf('='));
-                var data = segment.substring(segment.indexOf('=') + 1, segment.length);
-                parameters.push({
-                    name: name,
-                    data: data
-                });
-            }
-        });
+        var segments = parseUris(hash);
+        for(var name in segments){
+            parameters.push({
+                name: name,
+                data: segments[name]
+            });
+        }
+
         return parameters;
+    }
+
+    function tryDecodeURIComponent(value) {
+        try {
+            return decodeURIComponent(value);
+        } catch (error) {
+            console.error('There was an issue parsing the uri segment, check your iframe src', error);
+        }
+    }
+
+    function parseUris(keyValue) {
+        keyValue = keyValue.replace(/^\?/, '');
+        var segmentResults = {}, value, key;
+        var segments = (keyValue || "").split('&');
+        for (var i=0; i<segments.length; i++) {
+            var kValue = segments[i];
+            if (kValue) {
+                value = kValue.replace(/\+/g,'%20').split('=');
+                key = tryDecodeURIComponent(value[0]);
+                if (isDefined(key)) {
+                    var val = isDefined(value[1]) ? tryDecodeURIComponent(value[1]) : true;
+                    if (!hasOwnProperty.call(segmentResults, key)) {
+                        segmentResults[key] = val;
+                    } else if (isArray(segmentResults[key])) {
+                        segmentResults[key].push(val);
+                    } else {
+                        segmentResults[key] = [segmentResults[key],val];
+                    }
+                }
+            }
+        }
+        return segmentResults;
     }
 
     function prependElement(parentElement, element) {
@@ -401,6 +428,10 @@
     function elementExistsByClassName(className) {
         var existingElements = window.document.getElementsByClassName(className);
         return existingElements.length > 0;
+    }
+
+    function isDefined(value) {
+        return typeof value !== 'undefined';
     }
 
     /**
