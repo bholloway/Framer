@@ -262,8 +262,14 @@
         this.handlers = [];
 
         this.params = parseParams();
-        this.name = filterByKeyValue(this.params, 'name', 'name', true).data;
-        this.origin = filterByKeyValue(this.params, 'name', 'origin').data; //todo get last value
+        var name = filterByKeyValue(this.params, 'name', 'name', true);
+        var origin = filterByKeyValue(this.params, 'name', 'origin');
+        if(!isDefined(name) || !isDefined(origin)) {
+            console.info('Framer will not work without the correct origin and name url args');
+            return;
+        }
+        this.name = name.data;
+        this.origin = origin.data;
 
         this.receiveMessage = function (event) {
             if (event.origin !== document.location.origin) {
@@ -362,7 +368,7 @@
     }
 
     function parseParams(hash) {
-        hash = hash || document.location.search;
+        hash = hash || resolveHashSearch();
         var parameters = [];
 
         var segments = parseUris(hash);
@@ -374,6 +380,16 @@
         }
 
         return parameters;
+    }
+
+    function resolveHashSearch() {
+        if(document.location.search !== '') {
+            return document.location.search;
+        } else {
+            var hash = document.location.hash;
+            var strippedHash = hash.substring(hash.indexOf('?') + 1, hash.length);
+            return strippedHash;
+        }
     }
 
     function tryDecodeURIComponent(value) {
