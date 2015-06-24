@@ -98,8 +98,11 @@
         }
         options = options || {};
 
-        if (!options.style) {
+        if (!isDefined(options.style)) {
             options.style = this.style;
+        }
+        if (!isDefined(options.append)) {
+            options.append = true;
         }
 
         var frame = new Frame(FramerClientMessengerType, name, src, options);
@@ -181,8 +184,9 @@
 
         if (!frame.frameElement) {
             this.createFrameElement(frame);
-            prependElement(this.container, frame.frameElement);
-
+            if(frame.options.append) {
+                prependElement(this.container, frame.frameElement);
+            }
         } else {
             console.warn('Framer', this.name, 'already has', frame.name, 'open');
         }
