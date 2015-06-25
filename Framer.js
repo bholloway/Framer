@@ -167,6 +167,7 @@
             return;
         }
         this.closeFrame(existing);
+        this.focus = null;
     };
 
     Framer.prototype.handleMessage = function (message) {
