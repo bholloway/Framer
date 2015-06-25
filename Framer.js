@@ -185,7 +185,11 @@
         if (!frame.frameElement) {
             this.createFrameElement(frame);
             if(frame.options.append) {
-                prependElement(this.container, frame.frameElement);
+                var parent = this.container;
+                if(frame.options.parent) {
+                    parent = frame.options.parent;
+                }
+                prependElement(parent, frame.frameElement);
             }
         } else {
             console.warn('Framer', this.name, 'already has', frame.name, 'open');
@@ -194,15 +198,10 @@
 
     Framer.prototype.closeFrame = function (frame) {
         if (frame.frameElement) {
-            //todo make this configurable
-            //todo destroy event to loop through frames for custom gc clean hook
-            frame.frameElement.parentNode.removeChild(frame.frameElement);
-            frame.frameElement = undefined;
-
-            //todo Prevent memory leaks with reload();
-            //setTimeout(function () {
-            //    frame.frameElement.contentWindow.location.reload();
-            //}, 0);
+            setTimeout(function() {
+                frame.frameElement.parentNode.removeChild(frame.frameElement);
+                frame.frameElement = undefined;
+            }, 100);
         } else {
             console.warn('Framer', this.name, 'frame', frame.name, 'is not open to close');
         }
@@ -249,6 +248,7 @@
 
         iframe.id = frame.name;
         iframe.src = src + origin + params;
+        iframe.sandbox = 'allow-forms allow-scripts allow-same-origin';
         frame.frameElement = iframe;
 
         return frame;
