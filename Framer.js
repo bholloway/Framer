@@ -232,9 +232,7 @@
     function closeFrameWindow(frame) {
         setTimeout(function () {
             try {
-                // For IE
-                //TODO check what the equivalent in other browsers are
-                frame.frameElement.src = 'javascript:false';
+                frame.frameElement.src = 'about:blank';
             }
             catch (ex) {
                 // Do nothing
