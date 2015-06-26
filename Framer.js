@@ -40,7 +40,7 @@
         };
 
         this.receiveMessage = function (event) {
-            if (event.origin !==  document.location.origin) {
+            if (event.origin !== document.location.origin) {
                 return;
             }
 
@@ -185,9 +185,9 @@
 
         if (!frame.frameElement) {
             this.createFrameElement(frame);
-            if(frame.options.append) {
+            if (frame.options.append) {
                 var parent = this.container;
-                if(frame.options.parent) {
+                if (frame.options.parent) {
                     parent = frame.options.parent;
                 }
                 prependElement(parent, frame.frameElement);
@@ -199,14 +199,52 @@
 
     Framer.prototype.closeFrame = function (frame) {
         if (frame.frameElement) {
-            setTimeout(function() {
-                frame.frameElement.parentNode.removeChild(frame.frameElement);
-                frame.frameElement = undefined;
-            }, 100);
+            var childWindow = frame.frameElement.contentWindow;
+            console.log('frame options', frame.options);
+            if (frame.options.angularAppId && childWindow.angular) {
+                angularCloseFrameWindow(frame);
+            }
+            else {
+                closeFrameWindow(frame);
+            }
         } else {
             console.warn('Framer', this.name, 'frame', frame.name, 'is not open to close');
         }
     };
+
+    function angularCloseFrameWindow(frame) {
+        var childWindow = frame.frameElement.contentWindow;
+        var ngApp = childWindow.angular.element(childWindow.document.getElementById(frame.options.angularAppId));
+        console.log('ngApp', ngApp);
+
+        var injector = childWindow.angular.element(ngApp).injector();
+        destroyAllScopes();
+
+        function destroyAllScopes() {
+            var rootScope = injector.get('$rootScope');
+            rootScope.$broadcast("$destroy");
+            setTimeout(function() {
+                closeFrameWindow(frame);
+            }, 0);
+        }
+    }
+
+    function closeFrameWindow(frame) {
+        setTimeout(function () {
+            try {
+                // For IE
+                //TODO check what the equivalent in other browsers are
+                frame.frameElement.src = 'javascript:false';
+            }
+            catch (ex) {
+                // Do nothing
+            }
+            setTimeout(function () {
+                frame.frameElement.parentNode.removeChild(frame.frameElement);
+                frame.frameElement = undefined;
+            }, 100);
+        }, 0);
+    }
 
     Framer.prototype.getFrame = function (frame) {
         var existingFrame;
@@ -269,7 +307,7 @@
         this.params = parseParams();
         var name = filterByKeyValue(this.params, 'name', 'name', true);
         var origin = filterByKeyValue(this.params, 'name', 'origin');
-        if(!isDefined(name) || !isDefined(origin)) {
+        if (!isDefined(name) || !isDefined(origin)) {
             console.info('Framer will not work without the correct origin and name url args');
             return;
         }
@@ -313,7 +351,7 @@
         }
     };
 
-    Framer.prototype.createFrameContainer = function(className) {
+    Framer.prototype.createFrameContainer = function (className) {
         var container;
         if (!elementExistsByClassName(className)) {
             container = window.document.createElement('div');
@@ -377,7 +415,7 @@
         var parameters = [];
 
         var segments = parseUris(hash);
-        for(var name in segments){
+        for (var name in segments) {
             parameters.push({
                 name: name,
                 data: segments[name]
@@ -388,7 +426,7 @@
     }
 
     function resolveHashSearch() {
-        if(document.location.search !== '') {
+        if (document.location.search !== '') {
             return document.location.search;
         } else {
             var hash = document.location.hash;
@@ -409,10 +447,10 @@
         keyValue = keyValue.replace(/^\?/, '');
         var segmentResults = {}, value, key;
         var segments = (keyValue || "").split('&');
-        for (var i=0; i<segments.length; i++) {
+        for (var i = 0; i < segments.length; i++) {
             var kValue = segments[i];
             if (kValue) {
-                value = kValue.replace(/\+/g,'%20').split('=');
+                value = kValue.replace(/\+/g, '%20').split('=');
                 key = tryDecodeURIComponent(value[0]);
                 if (isDefined(key)) {
                     var val = isDefined(value[1]) ? tryDecodeURIComponent(value[1]) : true;
@@ -421,7 +459,7 @@
                     } else if (isArray(segmentResults[key])) {
                         segmentResults[key].push(val);
                     } else {
-                        segmentResults[key] = [segmentResults[key],val];
+                        segmentResults[key] = [segmentResults[key], val];
                     }
                 }
             }
