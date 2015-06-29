@@ -29,19 +29,38 @@ function Manager(name) {
         overflow: 'hidden'
     };
 
-    this.receiveMessage = function (event) {
-        if (event.origin !== document.location.origin) {
-            return;
-        }
+    this.listen();
 
-        if (event.data.messenger === ClientMessage &&
-            (event.data.target === this.name || typeof event.data.target === 'undefined')) {
-            this.handleMessage(event.data);
-        }
+    window.framer.managers.push(this);
+}
+
+Manager.prototype.receiveMessage = function (event) {
+    if (event.origin !== document.location.origin) {
+        return;
+    }
+
+    if (event.data.messenger === ClientMessage &&
+        (event.data.target === this.name || typeof event.data.target === 'undefined')) {
+        this.handleMessage(event.data);
+    }
+};
+
+Manager.prototype.destroy = function() {
+    this.unListen();
+};
+
+Manager.prototype.listen = function() {
+    this.listener = function(event){
+        this.receiveMessage(event);
     }.bind(this);
 
-    window.addEventListener('message', this.receiveMessage, false);
-}
+    window.addEventListener('message', this.listener, false);
+};
+
+Manager.prototype.unListen = function() {
+    window.removeEventListener('message', this.listener);
+    this.listener = undefined;
+};
 
 /**
  * Send a message to a Client, if no target is specified send to all.
@@ -191,17 +210,16 @@ Manager.prototype.closeFrame = function (frame) {
     if (frame.frameElement) {
         var childWindow = frame.frameElement.contentWindow;
         console.log('frame options', frame.options);
-        if (frame.options.angularAppId && childWindow.angular) {
-            angularCloseFrameWindow(frame);
-        }
-        else {
+        //if (frame.options.angularAppId && childWindow.angular) {
+        //    angularCloseFrameWindow(frame);
+        //}
+        //else {
             closeFrameWindow(frame);
-        }
+        //}
     } else {
         console.warn('Manager', this.name, 'frame', frame.name, 'is not open to close');
     }
 };
-
 
 Manager.prototype.getFrame = function (frame) {
     var existingFrame;

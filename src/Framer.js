@@ -1,4 +1,5 @@
 window.framer = {
+    managers: [],
     Manager: Manager,
     Client: Client,
     domLog: domLog
