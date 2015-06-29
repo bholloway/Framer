@@ -34,7 +34,7 @@ function Manager(name) {
             return;
         }
 
-        if (event.data.messenger === FramerClientMessengerType &&
+        if (event.data.messenger === ClientMessage &&
             (event.data.target === this.name || typeof event.data.target === 'undefined')) {
             this.handleMessage(event.data);
         }
@@ -50,7 +50,7 @@ function Manager(name) {
  * @param target
  */
 Manager.prototype.send = function (type, data, target) {
-    var message = new FrameMessage(type, data, this.name, target, FramerMessengerType);
+    var message = new FrameMessage(type, data, this.name, target, ManagerMessage);
     window.postMessage(message, document.location.origin);
 };
 
@@ -95,7 +95,7 @@ Manager.prototype.add = function (name, src, options) {
         options.append = true;
     }
 
-    var frame = new Frame(FramerClientMessengerType, name, src, options);
+    var frame = new Frame(ClientMessage, name, src, options);
     this.frames.push(frame);
 
     return frame;

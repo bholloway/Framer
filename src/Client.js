@@ -16,7 +16,7 @@ function Client() {
             return;
         }
 
-        if (event.data.messenger === FramerMessengerType &&
+        if (event.data.messenger === ManagerMessage &&
             (event.data.target === this.name || typeof event.data.target === 'undefined')) {
             this.handleMessage(event.data);
         }
@@ -33,7 +33,7 @@ Client.prototype.handleMessage = function (message) {
 };
 
 Client.prototype.send = function (type, data, target) {
-    var message = new FrameMessage(type, data, this.name, target, FramerClientMessengerType);
+    var message = new FrameMessage(type, data, this.name, target, ClientMessage);
     window.parent.postMessage(message, this.origin);
 };
 
