@@ -4,17 +4,15 @@
     <meta charset="UTF-8">
     <title></title>
 
-    <script src="../../Framer.js"></script>
-
+    <script type="text/javascript" src="../../../dist/framer.min.js"></script>
     <style>
         body {
             background-color: blue;
         }
     </style>
 
-    <script type="text/javascript" src="../../Framer.js"></script>
     <script>
-        var page = new framer.FramerClient();
+        var page = new framer.Client();
 
         page.receive('ping', function(message){
             framer.domLog('ping' + message);

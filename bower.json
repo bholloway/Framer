@@ -5,7 +5,7 @@
     "Chris impaler777@gmail.com"
   ],
   "description": "Manage and communicate between iframe/webview elements easier.",
-  "main": "Framer.js",
+  "main": "dist/framer.min.js",
   "keywords": [
     "iframe",
     "webview"

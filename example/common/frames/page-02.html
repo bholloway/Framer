@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title></title>
 
-    <script src="../../Framer.js"></script>
+    <script type="text/javascript" src="../../../dist/framer.min.js"></script>
 
     <style>
         body {
@@ -12,9 +12,8 @@
         }
     </style>
 
-    <script type="text/javascript" src="../../Framer.js"></script>
     <script>
-        var page = new framer.FramerClient();
+        var page = new framer.Client();
 
         page.receive('ping', function(message){
             framer.domLog('ping' + message);
@@ -26,12 +25,11 @@
 
 <body>
 
-    <h3>Page 01</h3>
+    <h3>Page 02</h3>
 
     <button onclick="page.send('ping', 'Hi I am page ' + page.name)">Ping All Framers</button>
     <button onclick="page.send('ping', 'Hi I am page ' + page.name)">Ping Main</button>
 
     <button onclick="page.send('close', page.name)">Close</button>
-
 </body>
 </html>
