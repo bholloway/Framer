@@ -37,9 +37,9 @@
 
             };
 
-            main.add('page-00', 'example/common/frames/page-00.html', options);
-            main.add('page-01', 'example/common/frames/page-01.html');
-            main.add('page-02', 'example/common/frames/page-02.html');
+            main.add('page-00', 'frames/page-00.html', options);
+            main.add('page-01', 'frames/page-01.html');
+            main.add('page-02', 'frames/page-02.html');
 
             main.receive('ping', function(message){
                 framer.domLog('ping' + message);

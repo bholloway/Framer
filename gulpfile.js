@@ -6,10 +6,19 @@ var del = require('del');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 var wrap = require('gulp-wrap');
+var opn = require('opn');
 
 var src = {
-    js: 'src/**.*js'
+    js: [
+        'src/Framer.js',
+        'src/util.js',
+        'src/Manager.js',
+        'src/Client.js',
+        'src/angular-frame.js'
+    ]
 };
+
+var commonExample = 'http://localhost:3000/examples/common/index.html';
 
 gulp.task('default', ['serve']);
 
@@ -17,8 +26,10 @@ gulp.task('serve', ['build'], function () {
 
     browserSync({
         server: '.',
-        index: 'example/common/index.html'
+        open: false
     });
+
+    opn(commonExample);
 
     gulp.watch(src.js, ['build']);
     gulp.watch(src.js).on('change', reload);
