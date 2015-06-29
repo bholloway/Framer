@@ -4,8 +4,8 @@ window.framer = {
     domLog: domLog
 };
 
-var ClientMessage = 'frame-client';
-var ManagerMessage = 'framer';
+var ClientMessage = 'client';
+var ManagerMessage = 'manager';
 
 function Frame(type, name, src, options) {
     this.type = type;
