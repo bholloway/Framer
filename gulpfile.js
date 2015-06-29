@@ -16,7 +16,8 @@ gulp.task('default', ['serve']);
 gulp.task('serve', ['build'], function () {
 
     browserSync({
-        server: '.'
+        server: '.',
+        index: 'example/common/index.html'
     });
 
     gulp.watch(src.js, ['build']);
