@@ -10,6 +10,7 @@ var opn = require('opn');
 
 var src = {
     js: [
+        'node_modules/signals/dist/signals.min.js',
         'src/Framer.js',
         'src/util.js',
         'src/Manager.js',
@@ -32,16 +33,23 @@ gulp.task('serve', ['build'], function () {
     opn(commonExample);
 
     gulp.watch(src.js, ['build']);
-    gulp.watch(src.js).on('change', reload);
+    gulp.watch(src.js).on('change', function(){
+        console.log('changes reloading..');
+        reload();
+    });
 });
 
 gulp.task('build', ['clean'], function () {
     return gulp.src(src.js)
         .pipe(sourcemaps.init())
-        .pipe(uglify())
+        //.pipe(uglify())
         .pipe(concat('framer.min.js'))
         .pipe(wrap('(function (window) {\n"use strict";\n<%= contents %>\n})(window);'))
-        .pipe(sourcemaps.write())
+        .pipe(sourcemaps.write(
+            {
+                includeContent: true,
+                base: './src'
+            }))
         .pipe(gulp.dest('dist'));
 });
 

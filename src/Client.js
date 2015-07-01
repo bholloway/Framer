@@ -5,7 +5,7 @@ function Client() {
     var name = filterByKeyValue(this.params, 'name', 'name', true);
     var origin = filterByKeyValue(this.params, 'name', 'origin');
     if (!isDefined(name) || !isDefined(origin)) {
-        console.info('A Framer Client will not work without the correct origin and name url args');
+        console.info('A Framer Client will not work without the correct origin and name url args, origin and name');
         return;
     }
     this.name = name.data;
@@ -15,12 +15,15 @@ function Client() {
 }
 
 Client.prototype.receiveMessage = function (event) {
-    if (event.origin !== document.location.origin) {
+    if (event &&
+        event.origin &&
+        event.origin !== window.top.document.location.origin) {
         return;
     }
 
     if (event.data.messenger === ManagerMessage &&
-        (event.data.target === this.name || typeof event.data.target === 'undefined')) {
+        (event.data.target === this.name ||
+        typeof event.data.target === 'undefined')) {
         this.handleMessage(event.data);
     }
 };
@@ -34,11 +37,11 @@ Client.prototype.listen = function() {
         this.receiveMessage(event);
     }.bind(this);
 
-    window.parent.addEventListener('message', this.listener, false);
+    window.top.addEventListener('message', this.listener, false);
 };
 
 Client.prototype.unListen = function() {
-    window.parent.removeEventListener('message', this.listener);
+    window.top.removeEventListener('message', this.listener);
     this.listener = undefined;
 };
 
@@ -51,7 +54,7 @@ Client.prototype.handleMessage = function (message) {
 
 Client.prototype.send = function (type, data, target) {
     var message = new FrameMessage(type, data, this.name, target, ClientMessage);
-    window.parent.postMessage(message, this.origin);
+    window.top.postMessage(message, this.origin);
 };
 
 Client.prototype.receive = function (type, callback) {

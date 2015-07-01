@@ -11,6 +11,7 @@ function Manager(name) {
     this.frames = [];
     this.handlers = [];
     this.focus = null;
+    this.persistentFrame = null;
     this.zIndex = 99999;
     this.container = this.createFrameContainer(this.name);
     // The default style will make the frames fullscreen as if this is a
@@ -30,6 +31,10 @@ function Manager(name) {
     };
 
     this.listen();
+
+    var Signal = signals.Signal;
+    this.closed = new Signal();
+    this.opened = new Signal();
 
     window.framer.managers.push(this);
 }
@@ -54,11 +59,11 @@ Manager.prototype.listen = function() {
         this.receiveMessage(event);
     }.bind(this);
 
-    window.addEventListener('message', this.listener, false);
+    window.top.addEventListener('message', this.listener, false);
 };
 
 Manager.prototype.unListen = function() {
-    window.removeEventListener('message', this.listener);
+    window.top.removeEventListener('message', this.listener);
     this.listener = undefined;
 };
 
@@ -70,7 +75,7 @@ Manager.prototype.unListen = function() {
  */
 Manager.prototype.send = function (type, data, target) {
     var message = new FrameMessage(type, data, this.name, target, ManagerMessage);
-    window.postMessage(message, document.location.origin);
+    window.top.postMessage(message, document.location.origin);
 };
 
 /**
@@ -113,6 +118,9 @@ Manager.prototype.add = function (name, src, options) {
     if (!isDefined(options.append)) {
         options.append = true;
     }
+    if (!isDefined(options.persistent)) {
+        options.persistent = true;
+    }
 
     var frame = new Frame(ClientMessage, name, src, options);
     this.frames.push(frame);
@@ -141,6 +149,8 @@ Manager.prototype.open = function (name, options) {
         mergeOptions(this.focus.options, options);
     }
     this.openFrame(this.focus);
+
+    this.opened.dispatch(existing);
 
     return existing;
 };
@@ -177,6 +187,8 @@ Manager.prototype.close = function (name) {
     }
     this.closeFrame(existing);
     this.focus = null;
+
+    this.closed.dispatch(existing);
 };
 
 Manager.prototype.handleMessage = function (message) {
@@ -192,7 +204,10 @@ Manager.prototype.openFrame = function (frame, options) {
         mergeOptions(frame.options, options);
     }
 
-    if (!frame.frameElement) {
+    if(frame.options.persistent) {
+        this.setPersistentFrame(frame);
+
+    } else if (!frame.frameElement) {
         this.createFrameElement(frame);
         if (frame.options.append) {
             var parent = this.container;
@@ -207,7 +222,11 @@ Manager.prototype.openFrame = function (frame, options) {
 };
 
 Manager.prototype.closeFrame = function (frame) {
-    if (frame.frameElement) {
+    if(frame.options.persistent && this.persistentFrame !== null) {
+        this.persistentFrame.src = 'about:blank';
+        this.persistentFrame.style.visibility = 'hidden';
+
+    } else if(frame.frameElement) {
         var childWindow = frame.frameElement.contentWindow;
         console.log('frame options', frame.options);
         //if (frame.options.angularAppId && childWindow.angular) {
@@ -242,6 +261,32 @@ Manager.prototype.getFrameByName = function (name) {
     }
 
     return frame;
+};
+
+Manager.prototype.setPersistentFrame = function(frame) {
+    if(this.persistentFrame === null) {
+        this.persistentFrame = document.createElement('iframe');
+        prependElement(this.container, this.persistentFrame);
+    }
+
+    var src = frame.src;
+    var options = frame.options;
+    options.arguments = options.arguments || {};
+    options.style = options.style || {};
+    options.attributes = options.attributes || {};
+    var parameters = createUrlArgs(options.arguments);
+    var params = '&name=' + frame.name + '&' + parameters;
+    var origin = '?origin=' + encodeURIComponent(document.location.href);
+
+    setElementStyles(this.persistentFrame, options.style);
+    setElementAttributes(this.persistentFrame, options.attributes);
+
+    this.persistentFrame.id = frame.name;
+    this.persistentFrame.src = src + origin + params;
+    this.persistentFrame.style.visibility = 'visible';
+    this.persistentFrame.sandbox = 'allow-forms allow-scripts allow-same-origin';
+    frame.frameElement = this.persistentFrame;
+
 };
 
 Manager.prototype.createFrameElement = function (frame) {
