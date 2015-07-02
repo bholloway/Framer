@@ -6,14 +6,19 @@
  * @param name
  * @constructor
  */
-function Manager(name) {
+function Manager(name, options) {
     this.name = name;
     this.frames = [];
     this.handlers = [];
     this.focus = null;
     this.persistentFrame = null;
     this.zIndex = 99999;
-    this.container = this.createFrameContainer(this.name);
+    if(options && options.container) {
+        this.container = options.container;
+        this.container.className += (' ' + this.name);
+    } else {
+        this.container = this.createFrameContainer(this.name);
+    }
     // The default style will make the frames fullscreen as if this is a
     // single frame application ;)
     this.style = {
@@ -84,7 +89,7 @@ Manager.prototype.send = function (type, data, target) {
  * @param type
  * @param callback
  */
-Manager.prototype.receive = function (type, callback) {
+Manager.prototype.on = function (type, callback) {
     if (!filterByKeyValue(this.handlers, 'type', type)) {
         this.handlers.push({
             type: type,

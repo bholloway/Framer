@@ -57,7 +57,7 @@ Client.prototype.send = function (type, data, target) {
     window.top.postMessage(message, this.origin);
 };
 
-Client.prototype.receive = function (type, callback) {
+Client.prototype.on = function (type, callback) {
     if (!filterByKeyValue(this.handlers, 'type', type)) {
         this.handlers.push({
             type: type,
