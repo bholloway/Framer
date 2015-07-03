@@ -53,6 +53,10 @@ Client.prototype.handleMessage = function (message) {
 };
 
 Client.prototype.send = function (type, data, target) {
+    if (!isDefined(this.name) || !isDefined(this.origin)) {
+        console.warn('Framer Client has no Manager to send', type, data);
+        return;
+    }
     var message = new FrameMessage(type, data, this.name, target, ClientMessage);
     window.top.postMessage(message, this.origin);
 };
