@@ -18,6 +18,8 @@
             // Create a new Manager Object
             main = new window.framer.Manager('main');
 
+            window.overrideSrc = 'http://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20';
+
             // Each frame can have a different style,
             // attributes and arguments that is persistent when its opened and closed.
             var options = {
@@ -76,6 +78,8 @@
     <br>
 
     <button onclick="main.open('page-00')">Page 00</button>
+
+    <button onclick="main.open('page-00', {src: overrideSrc})">Override src</button>
 
     <br>
 

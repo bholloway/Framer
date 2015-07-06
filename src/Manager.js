@@ -1,24 +1,28 @@
-
 /**
  * Manager is the manager of a set of iframe/webview elements
  * that can communicate with send and receive.
  *
  * @param name
  * @constructor
+ * @param options
  */
 function Manager(name, options) {
+    var existing = this.getManagerByName(name);
+    if(existing !== null) {
+        console.info('There is already a manager with the name', name);
+        if(this.focus)
+        this.applyOptions(options);
+        return existing;
+    }
+
+    this.applyOptions(options);
     this.name = name;
     this.frames = [];
     this.handlers = [];
     this.focus = null;
     this.persistentFrame = null;
     this.zIndex = 99999;
-    if(options && options.container) {
-        this.container = options.container;
-        this.container.className += (' ' + this.name);
-    } else {
-        this.container = this.createFrameContainer(this.name);
-    }
+
     // The default style will make the frames fullscreen as if this is a
     // single frame application ;)
     this.style = {
@@ -43,6 +47,28 @@ function Manager(name, options) {
 
     window.framer.managers.push(this);
 }
+
+Manager.prototype.applyOptions = function(options) {
+    if(options && options.container) {
+        this.container = options.container;
+        this.container.className += (' ' + this.name);
+    } else {
+        this.container = this.createFrameContainer(this.name);
+    }
+};
+
+Manager.prototype.getManagerByName = function(name) {
+    var result = window.framer.managers.filter(function (manager) {
+        return manager.name === name;
+    });
+    if (result.length > 0) {
+        result = result[0];
+    } else {
+        result = null;
+    }
+
+    return result;
+};
 
 Manager.prototype.receiveMessage = function (event) {
     if (event.origin !== document.location.origin) {
@@ -234,12 +260,7 @@ Manager.prototype.closeFrame = function (frame) {
     } else if(frame.frameElement) {
         var childWindow = frame.frameElement.contentWindow;
         console.log('frame options', frame.options);
-        //if (frame.options.angularAppId && childWindow.angular) {
-        //    angularCloseFrameWindow(frame);
-        //}
-        //else {
-            closeFrameWindow(frame);
-        //}
+        closeFrameWindow(frame);
     } else {
         console.warn('Manager', this.name, 'frame', frame.name, 'is not open to close');
     }
@@ -257,7 +278,7 @@ Manager.prototype.getFrame = function (frame) {
 };
 
 Manager.prototype.getFrameByName = function (name) {
-    var frame;
+    var frame = null;
     var result = this.frames.filter(function (frame) {
         return frame.name === name;
     });
@@ -274,11 +295,12 @@ Manager.prototype.setPersistentFrame = function(frame) {
         prependElement(this.container, this.persistentFrame);
     }
 
-    var src = frame.src;
     var options = frame.options;
+    var src = options.src || frame.src;
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
+
     var parameters = createUrlArgs(options.arguments);
     var params = '&name=' + frame.name + '&' + parameters;
     var origin = '?origin=' + encodeURIComponent(document.location.href);
@@ -291,15 +313,15 @@ Manager.prototype.setPersistentFrame = function(frame) {
     this.persistentFrame.style.visibility = 'visible';
     this.persistentFrame.sandbox = 'allow-forms allow-scripts allow-same-origin';
     frame.frameElement = this.persistentFrame;
-
 };
 
 Manager.prototype.createFrameElement = function (frame) {
-    var src = frame.src;
     var options = frame.options;
+    var src = options.src || frame.src;
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
+
     var parameters = createUrlArgs(options.arguments);
     var params = '&name=' + frame.name + '&' + parameters;
     var origin = '?origin=' + encodeURIComponent(document.location.href);
@@ -317,8 +339,6 @@ Manager.prototype.createFrameElement = function (frame) {
 
     return frame;
 };
-
-
 
 Manager.prototype.createFrameContainer = function (className) {
     var container;

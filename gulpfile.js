@@ -15,8 +15,7 @@ var src = {
         'src/Framer.js',
         'src/util.js',
         'src/Manager.js',
-        'src/Client.js',
-        'src/angular-frame.js'
+        'src/Client.js'
     ]
 };
 
@@ -49,8 +48,9 @@ gulp.task('build', ['clean'], function () {
         .pipe(wrap('<%= jsSignals %>\n\n(function (window) {\n"use strict";\n<%= contents %>\n})(window);',
             {jsSignals:jsSignalsContent}))
         .pipe(sourcemaps.write(
+            '.',
             {
-                includeContent: true,
+                includeContent: false,
                 base: './src'
             }))
         .pipe(gulp.dest('dist'));
