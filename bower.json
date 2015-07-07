@@ -1,8 +1,8 @@
 {
   "name": "framer",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "authors": [
-    "Chris impaler777@gmail.com"
+    "Chris Decoster <impaler777@gmail.com>"
   ],
   "description": "Manage and communicate between iframe/webview elements easier.",
   "main": "dist/framer.min.js",

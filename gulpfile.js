@@ -20,7 +20,6 @@ var src = {
 };
 
 var commonExample = 'http://localhost:3000/examples/common/index.html';
-var jsSignalsContent = fs.readFileSync(path.join(__dirname, 'node_modules/signals/dist/signals.min.js'), 'utf8');
 
 gulp.task('default', ['serve']);
 
@@ -34,7 +33,7 @@ gulp.task('serve', ['build'], function () {
     opn(commonExample);
 
     gulp.watch(src.js, ['build']);
-    gulp.watch(src.js).on('change', function(){
+    gulp.watch(src.js).on('change', function () {
         console.log('changes reloading..');
         reload();
     });
@@ -45,13 +44,13 @@ gulp.task('build', ['clean'], function () {
         .pipe(sourcemaps.init())
         .pipe(uglify())
         .pipe(concat('framer.min.js'))
-        .pipe(wrap('<%= jsSignals %>\n\n(function (window) {\n"use strict";\n<%= contents %>\n})(window);',
-            {jsSignals:jsSignalsContent}))
+        .pipe(wrap('(function (window) {\n"use strict";\n<%= contents %>\n})(window);'))
         .pipe(sourcemaps.write(
             '.',
             {
+                sourceRoot: '../src',
                 includeContent: false,
-                base: './src'
+                base: '../src'
             }))
         .pipe(gulp.dest('dist'));
 });

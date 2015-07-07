@@ -41,10 +41,6 @@ function Manager(name, options) {
 
     this.listen();
 
-    var Signal = signals.Signal;
-    this.closed = new Signal();
-    this.opened = new Signal();
-
     window.framer.managers.push(this);
 }
 
@@ -181,8 +177,6 @@ Manager.prototype.open = function (name, options) {
     }
     this.openFrame(this.focus);
 
-    this.opened.dispatch(existing);
-
     return existing;
 };
 
@@ -218,8 +212,6 @@ Manager.prototype.close = function (name) {
     }
     this.closeFrame(existing);
     this.focus = null;
-
-    this.closed.dispatch(existing);
 };
 
 Manager.prototype.handleMessage = function (message) {
@@ -292,11 +284,14 @@ Manager.prototype.getFrameByName = function (name) {
 Manager.prototype.setPersistentFrame = function(frame) {
     if(this.persistentFrame === null) {
         this.persistentFrame = document.createElement('iframe');
+    }
+    if(this.persistentFrame.parent !== this.container) {
         prependElement(this.container, this.persistentFrame);
     }
 
     var options = frame.options;
     var src = options.src || frame.src;
+    if(options.src) options.src = undefined;
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
@@ -318,6 +313,7 @@ Manager.prototype.setPersistentFrame = function(frame) {
 Manager.prototype.createFrameElement = function (frame) {
     var options = frame.options;
     var src = options.src || frame.src;
+    if(options.src) options.src = undefined;
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
