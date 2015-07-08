@@ -1,7 +1,9 @@
 window.framer = {
     managers: [],
+    clients: [],
     Manager: Manager,
     Client: Client,
+    getClientByName: getClientByName,
     domLog: domLog
 };
 
@@ -22,4 +24,17 @@ function FrameMessage(type, data, origin, target, messenger) {
     this.origin = origin;
     this.target = target;
     this.messenger = messenger;
+}
+
+function getClientByName(name) {
+    var result = window.top.framer.clients.filter(function (client) {
+        return client.name === name;
+    });
+    if (result.length > 0) {
+        result = result[0];
+    } else {
+        result = null;
+    }
+
+    return result;
 }

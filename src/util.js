@@ -1,7 +1,7 @@
-function closeFrameWindow(frame) {
+function closeFrameWindow(frame, callback) {
     setTimeout(function () {
         try {
-            frame.frameElement.src = 'about:blank';
+            frame.frameElement.src = '';
         }
         catch (ex) {
             // Do nothing
@@ -9,6 +9,7 @@ function closeFrameWindow(frame) {
         setTimeout(function () {
             frame.frameElement.parentNode.removeChild(frame.frameElement);
             frame.frameElement = undefined;
+            callback.apply();
         }, 100);
     }, 0);
 }
@@ -32,6 +33,16 @@ function mergeOptions(existing, custom) {
             existing[key] = custom[key];
         }
     });
+}
+
+function filterKeyPropertyValue(collection, value, key, property, last) {
+    var result = filterByKeyValue(collection, key, property, last);
+    if(typeof result !== 'undefined' && typeof result[value] !== 'undefined') {
+        return result[value];
+    } else {
+        return
+    }
+    return result[value];
 }
 
 function filterByKeyValue(collection, key, value, last) {

@@ -204,13 +204,13 @@ Manager.prototype.openAbove = function (name, options) {
     return existing;
 };
 
-Manager.prototype.close = function (name) {
+Manager.prototype.close = function (name, callback) {
     var existing = this.getFrame(name);
     if (!existing) {
         console.warn('Manager close() there is no frame with that name', name);
         return;
     }
-    this.closeFrame(existing);
+    this.closeFrame(existing, callback);
     this.focus = null;
 };
 
@@ -244,18 +244,26 @@ Manager.prototype.openFrame = function (frame, options) {
     }
 };
 
-Manager.prototype.closeFrame = function (frame) {
+Manager.prototype.closeFrame = function (frame, callback) {
     if(frame.options.persistent && this.persistentFrame !== null) {
-        this.persistentFrame.src = 'about:blank';
-        this.persistentFrame.style.visibility = 'hidden';
-
+            this.persistentFrame.src = 'about:blank';
+            this.persistentFrame.style.visibility = 'hidden';
+            var existing = window.top.framer.getClientByName(frame.name);
+            if(existing) {
+                existing.destroy();
+            }
+            if(callback) callback.apply();
     } else if(frame.frameElement) {
-        var childWindow = frame.frameElement.contentWindow;
-        console.log('frame options', frame.options);
-        closeFrameWindow(frame);
+        var existing = window.top.framer.getClientByName(frame.name);
+        if(existing) {
+            existing.destroy();
+        }
+        closeFrameWindow(frame, callback);
     } else {
         console.warn('Manager', this.name, 'frame', frame.name, 'is not open to close');
+        if(callback) callback.apply();
     }
+
 };
 
 Manager.prototype.getFrame = function (frame) {
@@ -289,6 +297,17 @@ Manager.prototype.setPersistentFrame = function(frame) {
         prependElement(this.container, this.persistentFrame);
     }
 
+    //Cleanup an existing persistent frame
+    if(frame.frameElement && frame.options.src) {
+        var client = window.top.framer.getClientByName(frame.name);
+        if(client) client.destroy();
+        this.openPersistentFrame(frame);
+
+    } else this.openPersistentFrame(frame);
+
+};
+
+Manager.prototype.openPersistentFrame = function(frame) {
     var options = frame.options;
     var src = options.src || frame.src;
     if(options.src) options.src = undefined;
@@ -308,7 +327,7 @@ Manager.prototype.setPersistentFrame = function(frame) {
     this.persistentFrame.style.visibility = 'visible';
     this.persistentFrame.sandbox = 'allow-forms allow-scripts allow-same-origin';
     frame.frameElement = this.persistentFrame;
-};
+}
 
 Manager.prototype.createFrameElement = function (frame) {
     var options = frame.options;
