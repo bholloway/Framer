@@ -10,6 +10,7 @@ var reload = browserSync.reload;
 var wrap = require('gulp-wrap');
 var opn = require('opn');
 
+var buildVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
 var src = {
     js: [
         'src/Framer.js',
@@ -41,17 +42,20 @@ gulp.task('serve', ['build'], function () {
 
 gulp.task('build', ['clean'], function () {
     return gulp.src(src.js)
-        .pipe(sourcemaps.init())
+        //.pipe(sourcemaps.init())
         .pipe(uglify())
         .pipe(concat('framer.min.js'))
-        .pipe(wrap('(function (window) {\n"use strict";\n<%= contents %>\n})(window);'))
-        .pipe(sourcemaps.write(
-            '.',
-            {
-                sourceRoot: '../src',
-                includeContent: false,
-                base: '../src'
-            }))
+        .pipe(wrap(
+            '//Framer <%= version %>\n\n(function (window) {\n"use strict";\n<%= contents %>\n})(window);',
+            {version: buildVersion}
+        ))
+        //.pipe(sourcemaps.write(
+        //    '.',
+        //    {
+        //        sourceRoot: '../src',
+        //        includeContent: false,
+        //        base: '../src'
+        //    }))
         .pipe(gulp.dest('dist'));
 });
 
