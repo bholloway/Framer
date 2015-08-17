@@ -67,10 +67,6 @@ Manager.prototype.getManagerByName = function(name) {
 };
 
 Manager.prototype.receiveMessage = function (event) {
-    if (event.origin !== document.location.origin) {
-        return;
-    }
-
     if (event.data.messenger === ClientMessage &&
         (event.data.target === this.name || typeof event.data.target === 'undefined')) {
         this.handleMessage(event.data);
@@ -86,11 +82,11 @@ Manager.prototype.listen = function() {
         this.receiveMessage(event);
     }.bind(this);
 
-    window.top.addEventListener('message', this.listener, false);
+    window.addEventListener('message', this.listener, false);
 };
 
 Manager.prototype.unListen = function() {
-    window.top.removeEventListener('message', this.listener);
+    window.removeEventListener('message', this.listener);
     this.listener = undefined;
 };
 
@@ -102,7 +98,13 @@ Manager.prototype.unListen = function() {
  */
 Manager.prototype.send = function (type, data, target) {
     var message = new FrameMessage(type, data, this.name, target, ManagerMessage);
-    window.top.postMessage(message, document.location.origin);
+    //send message to specific frame by id.
+    var frame = window.document.getElementById(target);
+    if(frame) {
+        frame.contentWindow.postMessage(message, '*');
+    } else {
+        window.postMessage(message, '*');
+    }
 };
 
 /**
@@ -248,16 +250,8 @@ Manager.prototype.closeFrame = function (frame, callback) {
     if(frame.options.persistent && this.persistentFrame !== null) {
             this.persistentFrame.src = 'about:blank';
             this.persistentFrame.style.visibility = 'hidden';
-            var existing = window.top.framer.getClientByName(frame.name);
-            if(existing) {
-                existing.destroy();
-            }
             if(callback) callback.apply();
     } else if(frame.frameElement) {
-        var existing = window.top.framer.getClientByName(frame.name);
-        if(existing) {
-            existing.destroy();
-        }
         closeFrameWindow(frame, callback);
     } else {
         console.warn('Manager', this.name, 'frame', frame.name, 'is not open to close');
@@ -299,8 +293,6 @@ Manager.prototype.setPersistentFrame = function(frame) {
 
     //Cleanup an existing persistent frame
     if(frame.frameElement && frame.options.src) {
-        var client = window.top.framer.getClientByName(frame.name);
-        if(client) client.destroy();
         this.openPersistentFrame(frame);
 
     } else this.openPersistentFrame(frame);
@@ -327,7 +319,7 @@ Manager.prototype.openPersistentFrame = function(frame) {
     this.persistentFrame.style.visibility = 'visible';
     this.persistentFrame.sandbox = 'allow-forms allow-scripts allow-same-origin';
     frame.frameElement = this.persistentFrame;
-}
+};
 
 Manager.prototype.createFrameElement = function (frame) {
     var options = frame.options;

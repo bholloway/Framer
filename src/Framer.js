@@ -27,7 +27,7 @@ function FrameMessage(type, data, origin, target, messenger) {
 }
 
 function getClientByName(name) {
-    var result = window.top.framer.clients.filter(function (client) {
+    var result = window.framer.clients.filter(function (client) {
         return client.name === name;
     });
     if (result.length > 0) {
