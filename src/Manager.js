@@ -15,8 +15,8 @@ function Manager(name, options) {
         return existing;
     }
 
-    this.applyOptions(options);
     this.name = name;
+    this.applyOptions(options);
     this.frames = [];
     this.handlers = [];
     this.focus = null;
@@ -175,7 +175,7 @@ Manager.prototype.open = function (name, options) {
     this.focus = existing;
 
     if (options) {
-        mergeOptions(this.focus.options, options);
+        this.focus.options = mergeOptions(this.focus.options, options);
     }
     this.openFrame(this.focus);
 
@@ -228,6 +228,7 @@ Manager.prototype.openFrame = function (frame, options) {
     if (options) {
         mergeOptions(frame.options, options);
     }
+    console.log('frame', frame.options.persistent)
 
     if(frame.options.persistent) {
         this.setPersistentFrame(frame);

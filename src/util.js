@@ -27,12 +27,12 @@ function createUrlArgs(args) {
 }
 
 function mergeOptions(existing, custom) {
+    if(!isDefined(existing)) existing = {};
     var keys = Object.getOwnPropertyNames(custom);
     keys.forEach(function (key) {
-        if (typeof existing[key] === 'undefined') {
-            existing[key] = custom[key];
-        }
+        existing[key] = custom[key];
     });
+    return existing;
 }
 
 function filterKeyPropertyValue(collection, value, key, property, last) {
