@@ -135,8 +135,6 @@ Manager.prototype.on = function (type, callback) {
 Manager.prototype.add = function (name, src, options) {
     var existing = filterByKeyValue(this.frames, 'name', name);
     if (existing) {
-        console.warn('Manager.add() there is already a frame named',
-            name, 'in the framer', this.name);
         return existing;
     }
     options = options || {};
@@ -228,8 +226,6 @@ Manager.prototype.openFrame = function (frame, options) {
     if (options) {
         mergeOptions(frame.options, options);
     }
-    console.log('frame', frame.options.persistent)
-
     if(frame.options.persistent) {
         this.setPersistentFrame(frame);
 
@@ -251,7 +247,9 @@ Manager.prototype.closeFrame = function (frame, callback) {
     if(frame.options.persistent && this.persistentFrame !== null) {
             this.persistentFrame.src = 'about:blank';
             this.persistentFrame.style.visibility = 'hidden';
-            if(callback) callback.apply();
+            setTimeout(function(){
+                if(callback) callback.apply();
+            });
     } else if(frame.frameElement) {
         closeFrameWindow(frame, callback);
     } else {
@@ -307,6 +305,7 @@ Manager.prototype.openPersistentFrame = function(frame) {
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
+    options.sandbox = options.sandbox || 'allow-forms allow-scripts allow-same-origin allow-modals';
 
     var parameters = createUrlArgs(options.arguments);
     var params = '&name=' + frame.name + '&' + parameters;
@@ -318,7 +317,7 @@ Manager.prototype.openPersistentFrame = function(frame) {
     this.persistentFrame.id = frame.name;
     this.persistentFrame.src = src + origin + params;
     this.persistentFrame.style.visibility = 'visible';
-    this.persistentFrame.sandbox = 'allow-forms allow-scripts allow-same-origin';
+    this.persistentFrame.sandbox = frame.options.sandbox;
     frame.frameElement = this.persistentFrame;
 };
 
@@ -329,6 +328,7 @@ Manager.prototype.createFrameElement = function (frame) {
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
+    options.sandbox = options.sandbox || 'allow-forms allow-scripts allow-same-origin allow-modals';
 
     var parameters = createUrlArgs(options.arguments);
     var params = '&name=' + frame.name + '&' + parameters;
@@ -342,7 +342,7 @@ Manager.prototype.createFrameElement = function (frame) {
 
     iframe.id = frame.name;
     iframe.src = src + origin + params;
-    iframe.sandbox = 'allow-forms allow-scripts allow-same-origin';
+    iframe.sandbox = options.sandbox;
     frame.frameElement = iframe;
 
     return frame;

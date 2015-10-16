@@ -1,39 +1,29 @@
 function Client(name, origin) {
+    this.handlers = [];
     this.params = parseParams();
     this.name = name || filterKeyPropertyValue(this.params, 'data', 'name', 'name', true);
     this.origin = origin || filterKeyPropertyValue(this.params, 'data', 'name', 'origin');
 
     if (!isDefined(this.name) || !isDefined(this.origin)) {
-        console.info('A Framer Client will not work without the correct origin and name url args, origin and name');
         return;
     }
 
-    //var existing = window.top.framer.getClientByName(this.name);
-    //if(existing !== null) {
-    //    console.warn('There is already a client with the name, we are now replacing it', this.name);
-    //    var indexOf = window.top.framer.clients.indexOf(existing);
-    //    existing.destroy();
-    //    window.top.framer.clients.splice(indexOf, 1);
-    //    existing = undefined;
-    //}
-
-    this.handlers = [];
-
     this.listen();
-    //window.top.framer.clients.push(this);
 }
 
 Client.prototype.send = function (type, data, target) {
     if (!isDefined(this.name) || !isDefined(this.origin)) {
-        console.warn('Framer Client has no Manager to send', type, data);
         return;
     }
     var message = new FrameMessage(type, data, this.name, target, ClientMessage);
-    //window.top.postMessage(message, this.origin);
     window.parent.postMessage(message, '*');
 };
 
 Client.prototype.on = function (type, callback) {
+    if (!isDefined(this.name) || !isDefined(this.origin)) {
+        return;
+    }
+
     if (!filterByKeyValue(this.handlers, 'type', type)) {
         this.handlers.push({
             type: type,
@@ -45,16 +35,6 @@ Client.prototype.on = function (type, callback) {
 };
 
 Client.prototype.receiveMessage = function (event) {
-    //if(typeof window.top === 'undefined' || typeof window.top === 'null') {
-    //    console.error('Client has a recieve message when window top is', typeof window.top);
-    //}
-    //
-    //if (event &&
-    //    event.origin &&
-    //    event.origin !== window.top.document.location.origin) {
-    //    return;
-    //}
-
     if (event.data.messenger === ManagerMessage &&
         (event.data.target === this.name ||
         typeof event.data.target === 'undefined')) {
@@ -66,8 +46,6 @@ Client.prototype.destroy = function(callback) {
     console.info('Framer Client', this.name, 'is being destroyed');
     this.unListen();
     this.handlers = [];
-    //var existingIndex = window.top.framer.clients.indexOf(this);
-    //window.top.framer.clients.splice(existingIndex, 1);
     if(callback) callback.apply();
 };
 
