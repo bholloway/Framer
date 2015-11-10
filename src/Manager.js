@@ -305,7 +305,7 @@ Manager.prototype.openPersistentFrame = function(frame) {
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
-    options.sandbox = options.sandbox || 'allow-forms allow-scripts allow-same-origin allow-modals';
+    options.sandbox = options.sandbox || 'allow-forms allow-scripts allow-same-origin';
 
     var parameters = createUrlArgs(options.arguments);
     var params = '&name=' + frame.name + '&' + parameters;
@@ -328,7 +328,7 @@ Manager.prototype.createFrameElement = function (frame) {
     options.arguments = options.arguments || {};
     options.style = options.style || {};
     options.attributes = options.attributes || {};
-    options.sandbox = options.sandbox || 'allow-forms allow-scripts allow-same-origin allow-modals';
+    options.sandbox = options.sandbox || 'allow-forms allow-scripts allow-same-origin';
 
     var parameters = createUrlArgs(options.arguments);
     var params = '&name=' + frame.name + '&' + parameters;
