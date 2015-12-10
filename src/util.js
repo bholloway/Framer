@@ -1,7 +1,7 @@
 function closeFrameWindow(frame, callback) {
     setTimeout(function () {
         try {
-            frame.frameElement.src = '';
+            frame.frameElement.src = 'about:blank';
         }
         catch (ex) {
             // Do nothing
